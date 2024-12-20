@@ -11,6 +11,8 @@ const corsOptions = {
   origin: "https://gdgk-devfest24-scanner.vercel.app",
   optionsSuccessStatus: 200,
   preflightContinue: true,
+  methods: 'GET, POST',
+  preflightContinue: true,
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
