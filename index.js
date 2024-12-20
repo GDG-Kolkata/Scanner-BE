@@ -40,7 +40,7 @@ const codes = {
     "john.doe@yopmail.com": "349201"
 }
 
-const uri = 'mongodb+srv://souvik:abcd@cluster0.tsezq.mongodb.net/DevfestIA_dev';
+const uri = 'mongodb+srv://souvik:abcd@cluster0.tsezq.mongodb.net/PullDevfest2024Shortlisted';
 const client = new MongoClient(uri);
 
 let db;
