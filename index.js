@@ -6,9 +6,13 @@ const logger = require("./logger");
 const app = express();
 const port = 4000;
 
+const allowedOrigins = [
+  "https://gdgk-devfest24-scanner.vercel.app",
+  "http://localhost:5173",
+];
 // Whitelist the specific URL
 const corsOptions = {
-  origin: "https://gdgk-devfest24-scanner.vercel.app",
+  origin: '*',
   optionsSuccessStatus: 200,
   preflightContinue: true,
   methods: "GET, POST, OPTIONS",
