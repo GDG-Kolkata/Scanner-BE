@@ -1,73 +1,78 @@
-const express = require('express');
-const { MongoClient, ObjectId } = require('mongodb');
-const cors = require('cors');
-const logger = require('./logger');
+const express = require("express");
+const { MongoClient, ObjectId } = require("mongodb");
+const cors = require("cors");
+const logger = require("./logger");
 
 const app = express();
 const port = 4000;
 
 // Whitelist the specific URL
 const corsOptions = {
-    origin: 'https://gdgk-devfest24-scanner.vercel.app',
-    optionsSuccessStatus: 200 // Some legacy browsers choke on 204
-  };
+  origin: "https://gdgk-devfest24-scanner.vercel.app",
+  optionsSuccessStatus: 200,
+  preflightContinue: true,
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 
 const codes = {
-    "pal.sarthaak@gmail.com": "832561",
-    "shiwanisoni29082002@gmail.com": "520879",
-    "anuragvermacontact@gmail.com": "685140",
-    "rohitkumarabc68@gmail.com": "979472",
-    "soumyarajbag@gmail.com": "690172",
-    "pritamtan2001@gmail.com": "191966",
-    "soumyaditya.dgp@gmail.com": "841319",
-    "jitkumarsil16@gmail.com": "680622",
-    "isharoy2006@gmail.com": "962178",
-    "arupmatabber03@gmail.com": "782830",
-    "prithasaha2722@gmail.com": "640041",
-    "saumya18921@gmail.com": "989167",
-    "souvikmicrobio@gmail.com": "628718",
-    "ishikadas882@gmail.com": "397294",
-    "sjha1172000@gmail.com": "139522",
-    "swaps.b003@gmail.com": "387352",
-    "iampaulsrijan@gmail.com": "402852",
-    "heysubinoy@gmail.com": "992907",
-    "ankana.001434@snuindia.in": "224232",
-    "adityasingh.110601@gmail.com": "224858",
-    "dibyataruchakraborty@gmail.com": "536489",
-    "sanhatikundu02@gmail.com": "302698",
-    "shourya.personal.999@gmail.com": "712312",
-    "kunalnumbers@gmail.com": "688836",
-    "john.doe@yopmail.com": "349201"
-}
+  "pal.sarthaak@gmail.com": "832561",
+  "shiwanisoni29082002@gmail.com": "520879",
+  "anuragvermacontact@gmail.com": "685140",
+  "rohitkumarabc68@gmail.com": "979472",
+  "soumyarajbag@gmail.com": "690172",
+  "pritamtan2001@gmail.com": "191966",
+  "soumyaditya.dgp@gmail.com": "841319",
+  "jitkumarsil16@gmail.com": "680622",
+  "isharoy2006@gmail.com": "962178",
+  "arupmatabber03@gmail.com": "782830",
+  "prithasaha2722@gmail.com": "640041",
+  "saumya18921@gmail.com": "989167",
+  "souvikmicrobio@gmail.com": "628718",
+  "ishikadas882@gmail.com": "397294",
+  "sjha1172000@gmail.com": "139522",
+  "swaps.b003@gmail.com": "387352",
+  "iampaulsrijan@gmail.com": "402852",
+  "heysubinoy@gmail.com": "992907",
+  "ankana.001434@snuindia.in": "224232",
+  "adityasingh.110601@gmail.com": "224858",
+  "dibyataruchakraborty@gmail.com": "536489",
+  "sanhatikundu02@gmail.com": "302698",
+  "shourya.personal.999@gmail.com": "712312",
+  "kunalnumbers@gmail.com": "688836",
+  "john.doe@yopmail.com": "349201",
+};
 
-const uri = 'mongodb+srv://souvik:abcd@cluster0.tsezq.mongodb.net/PullDevfest2024Shortlisted';
+const uri =
+  "mongodb+srv://souvik:abcd@cluster0.tsezq.mongodb.net/PullDevfest2024Shortlisted";
 const client = new MongoClient(uri);
 
 let db;
 
 async function connectDB() {
-    await client.connect();
-    db = client.db('PullDevfest2024Shortlisted');
-    collection = db.collection('paidUsers1');
-    console.log('Connected to database');
+  await client.connect();
+  db = client.db("PullDevfest2024Shortlisted");
+  collection = db.collection("paidUsers1");
+  console.log("Connected to database");
 }
 
-connectDB()
+connectDB();
 
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 
-app.get('/', async(req, res) => {
-    res.send('Hello World!');
+app.get("/", async (req, res) => {
+  res.send("Hello World!");
 });
 
-app.get('/attendee/:id', async (req, res) => {
+app.get("/attendee/:id", async (req, res) => {
   try {
     const attendeeId = req.params.id;
-    const attendee = await collection.findOne({ _id: new ObjectId(attendeeId) });
+    const attendee = await collection.findOne({
+      _id: new ObjectId(attendeeId),
+    });
     if (!attendee) {
       logger.warn(`Attendee not found: ${attendeeId}`);
-      return res.status(404).send('Attendee not found');
+      return res.status(404).send("Attendee not found");
     }
     logger.info(`Attendee retrieved: ${attendeeId}`);
     res.status(200).json(attendee);
@@ -77,28 +82,42 @@ app.get('/attendee/:id', async (req, res) => {
   }
 });
 
-app.post('/attendee/:id', async (req, res) => {
+app.post("/attendee/:id", async (req, res) => {
   try {
     const attendeeId = req.params.id;
-    if(req.body.requested_by){ requested_by = req.body.requested_by; }
-    if(req.body.check_in){ check_in = req.body.check_in; }
-    if(req.body.swag){ swag = req.body.swag; }
-    if(req.body.food){ food = req.body.food; }
+    if (req.body.requested_by) {
+      requested_by = req.body.requested_by;
+    }
+    if (req.body.check_in) {
+      check_in = req.body.check_in;
+    }
+    if (req.body.swag) {
+      swag = req.body.swag;
+    }
+    if (req.body.food) {
+      food = req.body.food;
+    }
 
     if (!(check_in && food && swag) || !(food && (check_in || swag))) {
-      logger.warn(`Invalid parameters for updating attendee ${attendeeId} requested by ${requested_by}`);
-      return res.status(400).send('Invalid parameters: food cannot be sent with check_in or swag');
+      logger.warn(
+        `Invalid parameters for updating attendee ${attendeeId} requested by ${requested_by}`
+      );
+      return res
+        .status(400)
+        .send("Invalid parameters: food cannot be sent with check_in or swag");
     }
 
     if (!codes.includes(requested_by)) {
       logger.warn(`Volunteer not found ${requested_by}`);
-      return res.status(400).send('Invalid requested_by code');
+      return res.status(400).send("Invalid requested_by code");
     }
 
-    const attendee = await collection.findOne({ _id: new ObjectId(attendeeId) });
+    const attendee = await collection.findOne({
+      _id: new ObjectId(attendeeId),
+    });
     if (!attendee) {
       logger.warn(`Attendee not found: ${attendeeId}`);
-      return res.status(400).send('Attendee not found');
+      return res.status(400).send("Attendee not found");
     }
 
     const updateFields = {};
@@ -120,11 +139,16 @@ app.post('/attendee/:id', async (req, res) => {
         updateFields.food_updatedAt = new Date();
         updateFields.food_updatedBy = requested_by;
       } else {
-        return res.status(400).send('Food can only be updated if check_in and swag are true');
+        return res
+          .status(400)
+          .send("Food can only be updated if check_in and swag are true");
       }
     }
 
-    await collection.updateOne({ _id: new ObjectId(attendeeId) }, { $set: updateFields });
+    await collection.updateOne(
+      { _id: new ObjectId(attendeeId) },
+      { $set: updateFields }
+    );
     logger.info(`Attendee updated: ${attendeeId}`);
     res.status(201).json(attendee);
   } catch (error) {
@@ -133,7 +157,7 @@ app.post('/attendee/:id', async (req, res) => {
   }
 });
 
-app.get('/generate_session/', async (req, res) => {
+app.get("/generate_session/", async (req, res) => {
   try {
     const { email, code } = req.query;
 
@@ -150,7 +174,7 @@ app.get('/generate_session/', async (req, res) => {
   }
 });
 
-app.get('/getAllAttendees', async (req, res) => {
+app.get("/getAllAttendees", async (req, res) => {
   try {
     const attendees = await collection.find().toArray();
     console.log(attendees);
