@@ -51,13 +51,23 @@ const client = new MongoClient(uri);
 let db;
 
 async function connectDB() {
-  await client.connect();
-  db = client.db("PullDevfest2024Shortlisted");
-  collection = db.collection("paidUsers1");
-  console.log("Connected to database");
+  try {
+    await client.connect();
+    db = client.db("PullDevfest2024Shortlisted");
+    collection = db.collection("paidUsers1");
+    console.log("Connected to database");
+  } catch (error) {
+    console.error("Error connecting to the database:", error);
+    process.exit(1); // Exit the process if DB connection fails
+  }
 }
 
-connectDB();
+connectDB().then(() => {
+  // Start the Express app only after the DB is connected
+  app.listen(port, () => {
+    logger.info(`Server is running on http://localhost:${port}`);
+  });
+});
 
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
@@ -190,14 +200,23 @@ app.get("/generate_session/", async (req, res) => {
 
 app.get("/getAllAttendees", async (req, res) => {
   try {
+    // Ensure collection is defined and properly initialized
+    if (!collection) {
+      logger.error("Collection is not defined.");
+      return res.status(500).send("Internal Server Error: Collection not defined");
+    }
     const attendees = await collection.find().toArray();
-    console.log(attendees);
+    if (attendees.length === 0) {
+      logger.warn("No attendees found.");
+      return res.status(404).send("No attendees found");
+    }
     res.status(200).json(attendees);
   } catch (error) {
     logger.error(`Error retrieving all attendees: ${error.message}`);
-    res.status(400).send(error.message);
+    return res.status(400).send(`Error retrieving all attendees: ${error.message}`);
   }
 });
+
 
 app.listen(port, () => {
   logger.info(`Server is running on http://localhost:${port}`);
