@@ -10,13 +10,20 @@ const allowedOrigins = [
   "https://gdgk-devfest24-scanner.vercel.app",
   "http://localhost:5173",
 ];
-// Whitelist the specific URL
+
 const corsOptions = {
-  origin: '*',
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
   optionsSuccessStatus: 200,
-  preflightContinue: true,
-  methods: "GET, POST, OPTIONS",
-  preflightContinue: true,
+  methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
 };
 
@@ -80,7 +87,9 @@ app.use(express.json()); // Ensure JSON parsing for POST requests
 app.use((req, res, next) => {
   console.log("Request URL:", req.url);
   console.log("Request Origin:", req.headers.origin);
+  logger.info(`${req.method} ${req.url} - Origin: ${req.headers.origin}`);
   res.setHeader("Access-Control-Allow-Origin", "https://gdgk-devfest24-scanner.vercel.app");
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
