@@ -8,19 +8,11 @@ const port = 4000;
 
 const allowedOrigins = [
   "https://gdgk-devfest24-scanner.vercel.app",
-  "http://localhost:5173",
+  // "http://localhost:5173",
 ];
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: "https://gdgk-devfest24-scanner.vercel.app",
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ["GET", "POST", "OPTIONS"],
@@ -89,7 +81,7 @@ app.use((req, res, next) => {
   console.log("Request Origin:", req.headers.origin);
   logger.info(`${req.method} ${req.url} - Origin: ${req.headers.origin}`);
   res.setHeader("Access-Control-Allow-Origin", "https://gdgk-devfest24-scanner.vercel.app");
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+  // res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
@@ -120,7 +112,7 @@ app.post("/attendee/:id", async (req, res) => {
     const { requested_by, check_in, swag, food } = req.body;
 
     // Validate `requested_by`
-    if (!Object.keys(codes).includes(requested_by)) {
+    if (!Object.values(codes).includes(requested_by)) {
       logger.warn(`Invalid requested_by: ${requested_by}`);
       return res.status(400).send("Invalid requested_by code");
     }
@@ -132,7 +124,7 @@ app.post("/attendee/:id", async (req, res) => {
     }
 
     // Validation rules
-    if (food && (!attendee.check_in || !attendee.swag)) {
+    if (food && (!attendee.check_in)) {
       return res
         .status(400)
         .send("Food can only be updated if check_in and swag are true");
@@ -164,7 +156,7 @@ app.post("/attendee/:id", async (req, res) => {
 
     const updatedAttendee = await collection.findOne({ _id: new ObjectId(attendeeId) });
     logger.info(`Attendee updated: ${attendeeId}`);
-    res.status(200).json(updatedAttendee);
+    res.status(200);
   } catch (error) {
     logger.error(`Error updating attendee: ${error.message}`);
     res.status(500).send(error.message);
