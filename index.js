@@ -60,6 +60,7 @@ async function connectDB() {
 connectDB();
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 
 // Logging middleware to check headers
