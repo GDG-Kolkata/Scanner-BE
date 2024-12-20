@@ -8,15 +8,20 @@ const port = 4000;
 
 const allowedOrigins = [
   "https://gdgk-devfest24-scanner.vercel.app",
+  "https://devfest.gdgkolkata.in",
   // "http://localhost:5173",
 ];
 
 const corsOptions = {
-  origin: "https://gdgk-devfest24-scanner.vercel.app",
+  origin: "https://devfest.gdgkolkata.in",
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "Access-Control-Allow-Origin",
+  ],
 };
 
 const codes = {
@@ -80,7 +85,11 @@ app.use((req, res, next) => {
   console.log("Request URL:", req.url);
   console.log("Request Origin:", req.headers.origin);
   logger.info(`${req.method} ${req.url} - Origin: ${req.headers.origin}`);
-  res.setHeader("Access-Control-Allow-Origin", "https://gdgk-devfest24-scanner.vercel.app");
+  res.setHeader(
+    "Access-Control-Allow-Origin",
+    "https://gdgk-devfest24-scanner.vercel.app"
+  );
+  res.setHeader("Access-Control-Allow-Origin", "https://devfest.gdgkolkata.in");
   // res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -94,7 +103,9 @@ app.get("/", (req, res) => {
 app.get("/attendee/:id", async (req, res) => {
   try {
     const attendeeId = req.params.id;
-    const attendee = await collection.findOne({ _id: new ObjectId(attendeeId) });
+    const attendee = await collection.findOne({
+      _id: new ObjectId(attendeeId),
+    });
     if (!attendee) {
       logger.warn(`Attendee not found: ${attendeeId}`);
       return res.status(404).send("Attendee not found");
@@ -117,14 +128,16 @@ app.post("/attendee/:id", async (req, res) => {
       return res.status(400).send("Invalid requested_by code");
     }
 
-    const attendee = await collection.findOne({ _id: new ObjectId(attendeeId) });
+    const attendee = await collection.findOne({
+      _id: new ObjectId(attendeeId),
+    });
     if (!attendee) {
       logger.warn(`Attendee not found: ${attendeeId}`);
       return res.status(404).send("Attendee not found");
     }
 
     // Validation rules
-    if (food && (!attendee.check_in)) {
+    if (food && !attendee.check_in) {
       return res
         .status(400)
         .send("Food can only be updated if check_in and swag are true");
@@ -187,7 +200,9 @@ app.get("/getAllAttendees", async (req, res) => {
   try {
     if (!collection) {
       logger.error("Collection is not defined.");
-      return res.status(500).send("Internal Server Error: Collection not defined");
+      return res
+        .status(500)
+        .send("Internal Server Error: Collection not defined");
     }
     const attendees = await collection.find().toArray();
     if (attendees.length === 0) {
