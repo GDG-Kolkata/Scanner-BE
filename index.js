@@ -13,7 +13,7 @@ const corsOptions = {
   preflightContinue: true,
   methods: 'GET, POST',
   preflightContinue: true,
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
 };
 
 const codes = {
