@@ -47,7 +47,7 @@ let db;
 
 async function connectDB() {
     await client.connect();
-    db = client.db('DevfestIA_dev');
+    db = client.db('PullDevfest2024Shortlisted');
     collection = db.collection('AttendeeDetails');
     console.log('Connected to database');
 }
