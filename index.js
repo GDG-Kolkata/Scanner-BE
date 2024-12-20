@@ -48,7 +48,7 @@ const codes = {
 };
 
 const uri =
-  "mongodb+srv://souvik:abcd@cluster0.tsezq.mongodb.net/PullDevfest2024Shortlisted";
+  "mongodb+srv://souvik:abcd@cluster0.tsezq.mongodb.net/DevfestIA_dev";
 const client = new MongoClient(uri);
 
 let db;
@@ -56,8 +56,8 @@ let collection;
 async function connectDB() {
   try {
     await client.connect();
-    db = client.db("PullDevfest2024Shortlisted");
-    collection = db.collection("paidUsers1");
+    db = client.db("DevfestIA_dev");
+    collection = db.collection("AttendeeDetails");
     console.log("Connected to database");
   } catch (error) {
     console.error("Error connecting to the database:", error);
