@@ -62,6 +62,17 @@ connectDB();
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 
+// Logging middleware to check headers
+app.use((req, res, next) => {
+  console.log("Request URL:", req.url);
+  console.log("Request Origin:", req.headers.origin);
+  res.setHeader('Access-Control-Allow-Origin', 'https://gdgk-devfest24-scanner.vercel.app');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
+
+
 app.get("/", async (req, res) => {
   res.send("Hello World!");
 });
