@@ -8,7 +8,7 @@ const port = 4000;
 
 // Whitelist the specific URL
 const corsOptions = {
-  origin: "*",
+  origin: "https://gdgk-devfest24-scanner.vercel.app",
   optionsSuccessStatus: 200,
   preflightContinue: true,
   methods: 'GET, POST',
