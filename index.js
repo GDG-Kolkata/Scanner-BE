@@ -154,9 +154,12 @@ app.post("/attendee/:id", async (req, res) => {
       { $set: updateFields }
     );
 
-    const updatedAttendee = await collection.findOne({ _id: new ObjectId(attendeeId) });
+    // const updatedAttendee = await collection.findOne({ _id: new ObjectId(attendeeId) });
     logger.info(`Attendee updated: ${attendeeId}`);
-    res.status(200);
+    return res.status(200).json({
+      message: "Attendee updated successfully",
+      ok: true,
+    });
   } catch (error) {
     logger.error(`Error updating attendee: ${error.message}`);
     res.status(500).send(error.message);
