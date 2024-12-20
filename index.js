@@ -13,7 +13,7 @@ const allowedOrigins = [
 ];
 
 const corsOptions = {
-  origin: "https://devfest.gdgkolkata.in",
+  origin: "http://localhost:5173",
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ["GET", "POST", "OPTIONS"],
