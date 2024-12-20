@@ -11,7 +11,7 @@ const corsOptions = {
   origin: "https://gdgk-devfest24-scanner.vercel.app",
   optionsSuccessStatus: 200,
   preflightContinue: true,
-  methods: 'GET, POST',
+  methods: "GET, POST, OPTIONS",
   preflightContinue: true,
   allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
 };
@@ -44,8 +44,8 @@ const codes = {
   "john.doe@yopmail.com": "349201",
 };
 
-const uri = 
-  "mongodb+srv://souvik:abcd@cluster0.tsezq.mongodb.net/";
+const uri =
+  "mongodb+srv://souvik:abcd@cluster0.tsezq.mongodb.net/PullDevfest2024Shortlisted";
 const client = new MongoClient(uri);
 
 let db;
@@ -63,42 +63,37 @@ async function connectDB() {
 }
 
 connectDB().then(() => {
-  // Start the Express app only after the DB is connected
   app.listen(port, () => {
     logger.info(`Server is running on http://localhost:${port}`);
   });
 });
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // Ensure JSON parsing for POST requests
 
-// Logging middleware to check headers
+// Middleware for setting headers and logging
 app.use((req, res, next) => {
   console.log("Request URL:", req.url);
   console.log("Request Origin:", req.headers.origin);
-  res.setHeader('Access-Control-Allow-Origin', 'https://gdgk-devfest24-scanner.vercel.app');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader("Access-Control-Allow-Origin", "https://gdgk-devfest24-scanner.vercel.app");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
 
-
-app.get("/", async (req, res) => {
+app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
 app.get("/attendee/:id", async (req, res) => {
   try {
     const attendeeId = req.params.id;
-    const attendee = await collection.findOne({
-      _id: new ObjectId(attendeeId),
-    });
+    const attendee = await collection.findOne({ _id: new ObjectId(attendeeId) });
     if (!attendee) {
       logger.warn(`Attendee not found: ${attendeeId}`);
       return res.status(404).send("Attendee not found");
     }
-    logger.info(`Attendee retrieved: ${attendeeId}`);
     res.status(200).json(attendee);
   } catch (error) {
     logger.error(`Error retrieving attendee: ${error.message}`);
@@ -109,39 +104,25 @@ app.get("/attendee/:id", async (req, res) => {
 app.post("/attendee/:id", async (req, res) => {
   try {
     const attendeeId = req.params.id;
-    if (req.body.requested_by) {
-      requested_by = req.body.requested_by;
-    }
-    if (req.body.check_in) {
-      check_in = req.body.check_in;
-    }
-    if (req.body.swag) {
-      swag = req.body.swag;
-    }
-    if (req.body.food) {
-      food = req.body.food;
-    }
+    const { requested_by, check_in, swag, food } = req.body;
 
-    if (!(check_in && food && swag) || !(food && (check_in || swag))) {
-      logger.warn(
-        `Invalid parameters for updating attendee ${attendeeId} requested by ${requested_by}`
-      );
-      return res
-        .status(400)
-        .send("Invalid parameters: food cannot be sent with check_in or swag");
-    }
-
-    if (!codes.includes(requested_by)) {
-      logger.warn(`Volunteer not found ${requested_by}`);
+    // Validate `requested_by`
+    if (!Object.keys(codes).includes(requested_by)) {
+      logger.warn(`Invalid requested_by: ${requested_by}`);
       return res.status(400).send("Invalid requested_by code");
     }
 
-    const attendee = await collection.findOne({
-      _id: new ObjectId(attendeeId),
-    });
+    const attendee = await collection.findOne({ _id: new ObjectId(attendeeId) });
     if (!attendee) {
       logger.warn(`Attendee not found: ${attendeeId}`);
-      return res.status(400).send("Attendee not found");
+      return res.status(404).send("Attendee not found");
+    }
+
+    // Validation rules
+    if (food && (!attendee.check_in || !attendee.swag)) {
+      return res
+        .status(400)
+        .send("Food can only be updated if check_in and swag are true");
     }
 
     const updateFields = {};
@@ -158,30 +139,26 @@ app.post("/attendee/:id", async (req, res) => {
     }
 
     if (food !== undefined) {
-      if (attendee.check_in && attendee.swag) {
-        updateFields.food = food;
-        updateFields.food_updatedAt = new Date();
-        updateFields.food_updatedBy = requested_by;
-      } else {
-        return res
-          .status(400)
-          .send("Food can only be updated if check_in and swag are true");
-      }
+      updateFields.food = food;
+      updateFields.food_updatedAt = new Date();
+      updateFields.food_updatedBy = requested_by;
     }
 
     await collection.updateOne(
       { _id: new ObjectId(attendeeId) },
       { $set: updateFields }
     );
+
+    const updatedAttendee = await collection.findOne({ _id: new ObjectId(attendeeId) });
     logger.info(`Attendee updated: ${attendeeId}`);
-    res.status(201).json(attendee);
+    res.status(200).json(updatedAttendee);
   } catch (error) {
     logger.error(`Error updating attendee: ${error.message}`);
     res.status(500).send(error.message);
   }
 });
 
-app.get("/generate_session/", async (req, res) => {
+app.get("/generate_session", (req, res) => {
   try {
     const { email, code } = req.query;
 
@@ -194,13 +171,12 @@ app.get("/generate_session/", async (req, res) => {
     }
   } catch (error) {
     logger.error(`Error generating session: ${error.message}`);
-    res.status(403).send(error.message);
+    res.status(500).send(error.message);
   }
 });
 
 app.get("/getAllAttendees", async (req, res) => {
   try {
-    // Ensure collection is defined and properly initialized
     if (!collection) {
       logger.error("Collection is not defined.");
       return res.status(500).send("Internal Server Error: Collection not defined");
@@ -213,11 +189,6 @@ app.get("/getAllAttendees", async (req, res) => {
     res.status(200).json(attendees);
   } catch (error) {
     logger.error(`Error retrieving all attendees: ${error.message}`);
-    return res.status(400).send(`Error retrieving all attendees: ${error.message}`);
+    res.status(500).send(error.message);
   }
-});
-
-
-app.listen(port, () => {
-  logger.info(`Server is running on http://localhost:${port}`);
 });
