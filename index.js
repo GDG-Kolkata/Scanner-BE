@@ -7,12 +7,12 @@ const app = express();
 const port = 4000;
 
 const allowedOrigins = [
-  "https://gdgk-devfest24-scanner.vercel.app",
+  "https://devfest-scanner-1.vercel.app",
   // "http://localhost:5173",
 ];
 
 const corsOptions = {
-  origin: "https://gdgk-devfest24-scanner.vercel.app",
+  origin: "https://devfest-scanner-1.vercel.app",
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ["GET", "POST", "OPTIONS"],
@@ -80,7 +80,7 @@ app.use((req, res, next) => {
   console.log("Request URL:", req.url);
   console.log("Request Origin:", req.headers.origin);
   logger.info(`${req.method} ${req.url} - Origin: ${req.headers.origin}`);
-  res.setHeader("Access-Control-Allow-Origin", "https://gdgk-devfest24-scanner.vercel.app");
+  res.setHeader("Access-Control-Allow-Origin", "https://devfest-scanner-1.vercel.app");
   // res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -195,6 +195,30 @@ app.get("/getAllAttendees", async (req, res) => {
       return res.status(404).send("No attendees found");
     }
     res.status(200).json(attendees);
+  } catch (error) {
+    logger.error(`Error retrieving all attendees: ${error.message}`);
+    res.status(500).send(error.message);
+  }
+});
+
+app.get("/liveStatus", async (req, res) => {
+  try {
+    if (!collection) {
+      logger.error("Collection is not defined.");
+      return res.status(500).send("Internal Server Error: Collection not defined");
+    }
+    const attendees = await collection.find().toArray();
+    let countJson = { check_in: 0, swag: 0, food: 0 };
+    if (attendees.length === 0) {
+      logger.warn("No attendees found.");
+      return res.status(404).send("No attendees found");
+    }
+    attendees.forEach ((ite) => {
+      json.check_in += ite?.check_in === true ? 1 : 0;
+      json.food += ite?.food === true ? 1 : 0;
+      json.swag += ite?.swag === true ? 1 : 0;
+    });
+    res.status(200).json(countJson);
   } catch (error) {
     logger.error(`Error retrieving all attendees: ${error.message}`);
     res.status(500).send(error.message);
