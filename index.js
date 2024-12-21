@@ -7,12 +7,12 @@ const app = express();
 const port = 4000;
 
 const allowedOrigins = [
-  "https://gdgk-devfest24-scanner.vercel.app",
+  "https://devfest-scanner-3.vercel.app",
   // "http://localhost:5173",
 ];
 
 const corsOptions = {
-  origin: "https://gdgk-devfest24-scanner.vercel.app",
+  origin: "https://devfest-scanner-3.vercel.app",
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ["GET", "POST", "OPTIONS"],
@@ -80,7 +80,7 @@ app.use((req, res, next) => {
   console.log("Request URL:", req.url);
   console.log("Request Origin:", req.headers.origin);
   logger.info(`${req.method} ${req.url} - Origin: ${req.headers.origin}`);
-  res.setHeader("Access-Control-Allow-Origin", "https://gdgk-devfest24-scanner.vercel.app");
+  res.setHeader("Access-Control-Allow-Origin", "https://devfest-scanner-3.vercel.app");
   // res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
