@@ -214,9 +214,9 @@ app.get("/liveStatus", async (req, res) => {
       return res.status(404).send("No attendees found");
     }
     attendees.forEach ((ite) => {
-      json.check_in += ite?.check_in === true ? 1 : 0;
-      json.food += ite?.food === true ? 1 : 0;
-      json.swag += ite?.swag === true ? 1 : 0;
+      countJson.check_in += ite?.check_in === true ? 1 : 0;
+      countJson.food += ite?.food === true ? 1 : 0;
+      countJson.swag += ite?.swag === true ? 1 : 0;
     });
     res.status(200).json(countJson);
   } catch (error) {
